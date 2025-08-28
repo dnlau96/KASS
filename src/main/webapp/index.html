@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Punto de Venta Supermercado</title>
+    <title>Sistema de Autocobro - Supermercado</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -13,7 +13,15 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 90%;
+            max-width: 800px;
         }
         
         .login-container {
@@ -21,8 +29,15 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 30px;
-            width: 350px;
             text-align: center;
+        }
+        
+        .product-scanner {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: none;
         }
         
         .logo {
@@ -76,6 +91,19 @@
             background-color: #2ecc71;
         }
         
+        .admin-link {
+            margin-top: 15px;
+            display: block;
+            color: #3498db;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .admin-link:hover {
+            text-decoration: underline;
+        }
+        
         .footer {
             margin-top: 20px;
             color: #95a5a6;
@@ -88,67 +116,259 @@
             margin-top: 5px;
             display: none;
         }
+        
+        .scanner-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        #productCode {
+            flex-grow: 1;
+        }
+        
+        #scanButton {
+            width: auto;
+        }
+        
+        .product-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .checkout-section {
+            margin-top: 20px;
+            text-align: right;
+        }
+        
+        .total-amount {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        #checkoutButton {
+            width: auto;
+            padding: 10px 20px;
+        }
+        
+        .admin-login {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="logo">
-            <!-- Reemplaza con el logo de tu supermercado -->
-            <img src="https://via.placeholder.com/150x50?text=Supermercado+Logo" alt="Logo Supermercado">
-        </div>
-        
-        <h1>Acceso al Punto de Venta</h1>
-        
-        <form id="loginForm">
-            <div class="input-group">
-                <label for="username">Usuario</label>
-                <input type="text" id="username" name="username" placeholder="Ingrese su usuario" required>
-                <div class="error-message" id="username-error"></div>
+    <div class="main-container">
+        <div class="login-container" id="mainLogin">
+            <div class="logo">
+                <img src="img/KASS_icone.png" alt="Logo Supermercado">
             </div>
             
-            <div class="input-group">
-                <label for="password">Contraseña</label>
-                <input type="password" id="password" name="password" placeholder="Ingrese su contraseña" required>
-                <div class="error-message" id="password-error"></div>
+            <h1>Sistema de Autocobro</h1>
+            
+            <div class="product-scanner" id="productScanner">
+                <div class="scanner-container">
+                    <input type="text" id="productCode" placeholder="Escanee o ingrese el código del producto">
+                    <button id="scanButton">Agregar</button>
+                </div>
+                
+                <div class="product-list" id="productList">
+                    <!-- Los productos agregados aparecerán aquí -->
+                </div>
+                
+                <div class="checkout-section">
+                    <div class="total-amount">Total: $<span id="totalAmount">0.00</span></div>
+                    <button id="checkoutButton" disabled>Proceder al Pago</button>
+                </div>
             </div>
             
-            <button type="submit">Ingresar</button>
-        </form>
-        
-        <div class="footer">
-            Sistema de Punto de Venta v1.0 © 2023
+            <a class="admin-link" id="adminToggle">Acceso administrador</a>
+            
+            <div class="admin-login" id="adminLogin">
+                <h2>Login Administrador</h2>
+                <form id="adminForm">
+                    <div class="input-group">
+                        <label for="adminUsername">Usuario Admin</label>
+                        <input type="text" id="adminUsername" name="adminUsername" placeholder="Usuario administrador" required>
+                        <div class="error-message" id="admin-username-error"></div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="adminPassword">Contraseña Admin</label>
+                        <input type="password" id="adminPassword" name="adminPassword" placeholder="Contraseña administrador" required>
+                        <div class="error-message" id="admin-password-error"></div>
+                    </div>
+                    
+                    <button type="submit">Ingresar como Admin</button>
+                </form>
+            </div>
+            
+            <div class="footer">
+                Sistema de Autocobro v2.0 © 2025
+            </div>
         </div>
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // Variables globales
+        let products = [];
+        let total = 0;
+        
+        // Referencias a elementos DOM
+        const adminToggle = document.getElementById('adminToggle');
+        const adminLogin = document.getElementById('adminLogin');
+        const productScanner = document.getElementById('productScanner');
+        const productCodeInput = document.getElementById('productCode');
+        const scanButton = document.getElementById('scanButton');
+        const productList = document.getElementById('productList');
+        const totalAmount = document.getElementById('totalAmount');
+        const checkoutButton = document.getElementById('checkoutButton');
+        const adminForm = document.getElementById('adminForm');
+        
+        // Alternar visibilidad del login de administrador
+        adminToggle.addEventListener('click', function() {
+            if (adminLogin.style.display === 'block') {
+                adminLogin.style.display = 'none';
+                adminToggle.textContent = 'Acceso administrador';
+            } else {
+                adminLogin.style.display = 'block';
+                adminToggle.textContent = 'Ocultar acceso administrador';
+            }
+        });
+        
+        // Simular base de datos de productos (en un caso real, esto vendría de tu backend)
+        const productDatabase = {
+            '1001': { name: 'Arroz 1kg', price: 2.50 },
+            '1002': { name: 'Frijoles 500g', price: 1.75 },
+            '1003': { name: 'Aceite 1L', price: 4.20 },
+            '1004': { name: 'Azúcar 1kg', price: 1.80 },
+            '1005': { name: 'Sal 500g', price: 0.90 },
+            '2001': { name: 'Leche 1L', price: 1.50 },
+            '2002': { name: 'Queso 250g', price: 3.25 },
+            '2003': { name: 'Yogurt', price: 1.20 },
+            '3001': { name: 'Pan integral', price: 2.00 },
+            '3002': { name: 'Galletas', price: 1.50 }
+        };
+        
+        // Agregar producto al escanear
+        scanButton.addEventListener('click', function() {
+            const code = productCodeInput.value.trim();
+            
+            if (code === '') {
+                alert('Por favor ingrese un código de producto');
+                return;
+            }
+            
+            if (productDatabase[code]) {
+                // Mostrar el área de scanner si está oculta
+                if (productScanner.style.display === 'none') {
+                    productScanner.style.display = 'block';
+                }
+                
+                // Agregar producto a la lista
+                products.push({...productDatabase[code], code});
+                total += productDatabase[code].price;
+                
+                // Actualizar interfaz
+                updateProductList();
+                updateTotal();
+                
+                // Habilitar botón de pago
+                checkoutButton.disabled = false;
+                
+                // Limpiar input
+                productCodeInput.value = '';
+                productCodeInput.focus();
+            } else {
+                alert('Producto no encontrado. Por favor verifique el código.');
+            }
+        });
+        
+        // Permitir agregar producto con Enter
+        productCodeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                scanButton.click();
+            }
+        });
+        
+        // Actualizar lista de productos
+        function updateProductList() {
+            productList.innerHTML = '';
+            
+            products.forEach((product, index) => {
+                const productItem = document.createElement('div');
+                productItem.className = 'product-item';
+                productItem.innerHTML = `
+                    <div>${product.name}</div>
+                    <div>$${product.price.toFixed(2)}</div>
+                `;
+                productList.appendChild(productItem);
+            });
+        }
+        
+        // Actualizar total
+        function updateTotal() {
+            totalAmount.textContent = total.toFixed(2);
+        }
+        
+        // Procesar pago
+        checkoutButton.addEventListener('click', function() {
+            // Aquí se procesaría el pago
+            alert(`Pago procesado por un total de $${total.toFixed(2)}. ¡Gracias por su compra!`);
+            
+            // Reiniciar sistema
+            products = [];
+            total = 0;
+            productList.innerHTML = '';
+            updateTotal();
+            checkoutButton.disabled = true;
+            productScanner.style.display = 'none';
+        });
+        
+        // Login de administrador
+        adminForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Validación simple (puedes mejorarla según tus necesidades)
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
             let isValid = true;
             
             // Limpiar mensajes de error
-            document.getElementById('username-error').style.display = 'none';
-            document.getElementById('password-error').style.display = 'none';
+            document.getElementById('admin-username-error').style.display = 'none';
+            document.getElementById('admin-password-error').style.display = 'none';
             
             if(username.trim() === '') {
-                document.getElementById('username-error').textContent = 'Por favor ingrese su usuario';
-                document.getElementById('username-error').style.display = 'block';
+                document.getElementById('admin-username-error').textContent = 'Por favor ingrese su usuario';
+                document.getElementById('admin-username-error').style.display = 'block';
                 isValid = false;
             }
             
             if(password.trim() === '') {
-                document.getElementById('password-error').textContent = 'Por favor ingrese su contraseña';
-                document.getElementById('password-error').style.display = 'block';
+                document.getElementById('admin-password-error').textContent = 'Por favor ingrese su contraseña';
+                document.getElementById('admin-password-error').style.display = 'block';
                 isValid = false;
             }
             
             if(isValid) {
-                // Aquí iría la lógica para autenticar al usuario
-                alert('Login exitoso! Redirigiendo al sistema...');
-                // window.location.href = 'dashboard.html';
+                // Aquí iría la lógica para autenticar al administrador
+                // Por ahora, una validación simple para demostración
+                if (username === 'admin' && password === 'admin123') {
+                    alert('Login de administrador exitoso! Redirigiendo al panel de control...');
+                    // window.location.href = 'admin-dashboard.html';
+                } else {
+                    alert('Credenciales de administrador incorrectas');
+                }
             }
         });
     </script>
