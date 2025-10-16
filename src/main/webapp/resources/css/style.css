@@ -1,0 +1,150 @@
+/* Paleta de colores y variables globales */
+:root {
+    --primary: #865f00;
+    --on-primary: #ffffff;
+    --secondary: #6b5d3f;
+    --surface: #fffbff;
+    --background: #fcf8f0;
+    --text-color: #1e1b16;
+    --success: #28a745;
+    --outline: #7e7667; /* Añadida para consistencia */
+}
+
+/* Estructura general */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background);
+    color: var(--text-color);
+}
+
+/* --- ESTILOS DEL HEADER --- */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 25px;
+    background-color: var(--surface);
+    border-bottom: 2px solid var(--outline);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Regla que hace el logo pequeño en el header */
+.logo-container img {
+    height: 75px; 
+    cursor: pointer;
+}
+
+.nav-links .ui-button {
+    background-color: transparent !important;
+    color: var(--primary) !important;
+    font-weight: bold !important;
+    border: none !important;
+}
+
+.header-right .customer-info {
+    padding: 8px 15px;
+    background-color: #f5e1bb; /* secondary-container */
+    border-radius: 20px;
+    font-weight: bold;
+    border: 1px solid var(--outline);
+}
+
+.main-content {
+    padding: 25px;
+}
+
+.content-card {
+    background-color: var(--surface);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: 1px solid var(--outline);
+}
+
+.total-display {
+    font-size: 3.5em;
+    font-weight: bold;
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+
+.actions-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #f3eee8; /* surface-container */
+}
+
+/* --- ESTILOS DE COMPONENTES PRIMEFACES CORREGIDOS --- */
+.ui-button {
+    background: var(--primary) !important;
+    color: var(--on-primary) !important; /* Colorea los iconos */
+    border: none !important;
+    font-weight: bold !important;
+    border-radius: 8px !important;
+}
+
+/* ===== ESTA ES LA REGLA QUE FALTABA ===== */
+/* Fuerza a que el texto DENTRO del botón sea blanco. */
+.ui-button .ui-button-text {
+    color: var(--on-primary) !important;
+}
+/* ========================================= */
+
+.ui-button:hover {
+    background: var(--secondary) !important;
+}
+
+.ui-button.ui-button-success {
+    background: var(--success) !important;
+}
+
+.ui-button.ui-button-danger {
+    background: #dc3545 !important; /* Color rojo para botones de cancelar/peligro */
+}
+
+.ui-datatable .ui-datatable-thead th {
+    background-color: #f3eee8 !important; /* surface-container */
+    font-weight: bold;
+}
+
+.ui-inputfield {
+    border-radius: 8px !important;
+    border: 1px solid var(--outline) !important;
+}
+
+/* Estilo para el espaciado en diálogos (PanelGrid) */
+.dialog-grid td {
+    padding: 8px;
+    border: none;
+}
+
+/* Estilo específico para los botones del header (como 'Identificar Cliente') */
+.ui-button.header-button {
+    background: transparent !important;
+    color: var(--primary) !important; /* Color para el icono */
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Y también para el texto dentro de ese botón */
+.ui-button.header-button .ui-button-text {
+    color: var(--primary) !important; /* Color para el texto */
+}
+
+/* Opcional: Un sutil efecto al pasar el mouse por encima */
+.ui-button.header-button:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
