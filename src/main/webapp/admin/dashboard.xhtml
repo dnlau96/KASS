@@ -6,14 +6,20 @@
     <title>KASS - Admin Panel</title>
     <h:outputStylesheet library="css" name="style.css" />
     <style>
-        .cards-container { display: flex; gap: 20px; padding: 20px; }
+        /* Tus estilos originales. Están perfectos. */
+        .cards-container { display: flex; gap: 20px; padding: 20px; flex-wrap: wrap; }
         .card { border: 1px solid #ccc; border-radius: 8px; padding: 20px; text-align: center; width: 300px; background-color: #fff; }
         .card .pi { font-size: 48px; color: var(--primary); }
         .card h2 { margin-top: 15px; }
+
+        .card .button-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
     </style>
 </h:head>
-    
-    
     
 <h:body>
     <div class="admin-header">
@@ -24,7 +30,9 @@
     </div>
 
     <div class="cards-container">
-        <h:panelGroup layout="block" styleClass="card" rendered="#{adminBean.currentUser.role == 'Administrador' or adminBean.currentUser.role == 'PRODUCT_MANAGER'}">
+        
+        <h:panelGroup layout="block" styleClass="card" 
+                      rendered="#{adminBean.currentUser.role == 'Administrador' or adminBean.currentUser.role == 'Bodeguero'}">
             <i class="pi pi-box"></i>
             <h2>Gestión de Productos</h2>
             <p>Añadir, editar y eliminar productos del inventario.</p>
@@ -33,7 +41,8 @@
             </h:form>
         </h:panelGroup>
 
-        <h:panelGroup layout="block" styleClass="card" rendered="#{adminBean.currentUser.role == 'Administrador'}">
+        <h:panelGroup layout="block" styleClass="card" 
+                      rendered="#{adminBean.currentUser.role == 'Administrador'}">
             <i class="pi pi-shield"></i>
             <h2>Gestión de Roles</h2>
             <p>Definir los roles de seguridad del sistema.</p>
@@ -42,29 +51,34 @@
             </h:form>
         </h:panelGroup>
         
-                <div class="p-col-12 p-md-6 p-lg-3"> <div class="card"> <div class="card-icon">
-                     <i class="pi pi-users" style="font-size: 3rem;"></i>
-                </div>
+        <h:panelGroup layout="block" styleClass="card" 
+                      rendered="#{adminBean.currentUser.role == 'Administrador'}">
+            <i class="pi pi-users"></i>
+            <h2>Gestión de Usuarios</h2>
+            <p>Añadir, editar y eliminar cuentas de usuario.</p>
+            <h:form>
+                <p:commandButton value="Administrar Usuarios" 
+                                 action="users?faces-redirect=true" />
+            </h:form>
+        </h:panelGroup>
 
-                <h3>Gestión de Usuarios</h3>
-
-                <p>Añadir, editar y eliminar cuentas de usuario.</p>
-
-                <h:form>
-                    <p:commandButton value="Administrar Usuarios" 
-                                     action="users?faces-redirect=true" />
-                </h:form>
-                 </div>
-                 </div>
-
-        <h:panelGroup layout="block" styleClass="card" rendered="#{adminBean.currentUser.role == 'Administrador'}">
+        <h:panelGroup layout="block" styleClass="card" 
+                      rendered="#{adminBean.currentUser.role == 'Administrador' or adminBean.currentUser.role == 'Bodeguero'}">
             <i class="pi pi-chart-bar"></i>
             <h2>Reportes y Kardex</h2>
             <p>Visualizar reportes de ventas y movimientos de inventario.</p>
             <h:form>
-                <p:commandButton value="Ver Reportes" action="kardex?faces-redirect=true" />
+                <div class="button-stack">
+                    
+                    <p:commandButton value="Ver Reportes de Venta" 
+                                     action="reportes?faces-redirect=true"
+                                     rendered="#{adminBean.currentUser.role == 'Administrador'}" />
+                    
+                    <p:commandButton value="Ir a Kardex" 
+                                     action="kardex?faces-redirect=true" />
+                </div>
             </h:form>
         </h:panelGroup>
-    </div>
-</h:body>
+        
+    </div> </h:body>
 </html>
