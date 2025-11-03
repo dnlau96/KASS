@@ -82,6 +82,12 @@ public class ProductService {
                  .getResultList();
     }
     
+    public Product findById(Long id) {
+        return em.find(Product.class, id);
+    }
+    
+    
+    
     /**
      * Saves a new product to the database.
      * @param product The new product to create.
@@ -104,14 +110,10 @@ public class ProductService {
         return null;
     }
 
-    /**
-     * Deletes a product from the database using its ID.
-     * @param id The ID of the product to delete.
-     */
-    public void delete(Long id) {
-        Product product = em.find(Product.class, id);
-        if (product != null) {
-            em.remove(product);
-        }
+    public void delete(Long productId) { 
+        Product product = findById(productId); 
+     if (product != null) {
+        em.remove(product);
     }
+}
 }

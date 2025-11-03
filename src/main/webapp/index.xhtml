@@ -1,196 +1,228 @@
-<?xml version='1.0' encoding='UTF-8' ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      lang="es">
 <h:head>
-    <title>KASS - Punto de Venta</title>
-    <style>
-        /* Aquí va todo tu código CSS */
-        :root {
-            --primary: #865f00; --on-primary: #ffffff; --primary-container: #ffdf9e;
-            --secondary: #6b5d3f; --secondary-container: #f5e1bb; --tertiary: #4a6700;
-            --surface: #fffbff; --surface-container: #f3eee8; --outline: #7e7667;
-            --background: #fcf8f0; --text-color: #1e1b16; --success: #28a745;
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KASS - Point of Sale</title>
+    <h:outputStylesheet library="css" name="style.css" />
+    
+    <script type="text/javascript">
+        function handleScanComplete(args) {
+            if (args.productFound) {
+                if (args.showCustomerDialog) {
+                    // Es el primer producto, abre el diálogo de NIT
+                    PF('customerDialogWidget').show();
+                } else {
+                    // No es el primer producto, abre el diálogo de confirmación normal
+                    PF('confirmDialogWidget').show();
+                }
+            }
+            // Si productFound es false, no hace nada (el bean mostrará el error)
         }
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: var(--background); color: var(--text-color); }
-        .header-panel { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; padding: 10px 20px; background-color: var(--surface); border-bottom: 1px solid var(--outline); border-radius: 12px 12px 0 0; border: 1px solid var(--outline); }
-        .logo-container { grid-column: 2; text-align: center; cursor: pointer; }
-        .customer-info-wrapper { grid-column: 3; justify-self: end; }
-        .customer-info { padding: 8px 12px; background-color: var(--secondary-container); border-radius: 20px; font-weight: bold; border: 1px solid var(--outline); }
-        .content-card { background-color: var(--surface); padding: 20px; border-radius: 0 0 12px 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--outline); border-top: none; }
-        .total-display { font-size: 2.8em; font-weight: bold; color: var(--primary); text-align: left; margin: 20px 0 0 20px; }
-        .actions-panel { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--surface-container); }
-        .ui-button { background: var(--primary) !important; color: var(--on-primary) !important; border: none !important; font-weight: bold !important; border-radius: 8px !important; transition: background-color 0.3s !important; padding: 10px 15px !important; }
-        .ui-button:hover { background: var(--secondary) !important; }
-        .ui-button.ui-button-success { background: var(--success) !important; font-size: 1.2em !important; }
-        .ui-datatable .ui-datatable-thead th { background-color: var(--surface-container) !important; color: var(--text-color) !important; font-weight: bold; }
-        .ui-inputfield { border-radius: 8px !important; border: 1px solid var(--outline) !important; }
-        .ui-paginator .ui-state-active { background: var(--secondary-container) !important; }
-        .footer-info { position: fixed; bottom: 10px; right: 10px; font-size: 0.8em; color: #888; }
-        /* Nuevos estilos para la ventana de administrador */
-        .admin-dialog {
-            width: 400px;
-            padding: 20px;
-        }
-        .admin-dialog-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-        .admin-dialog-content .ui-panelgrid-cell {
-            padding: 5px;
-        }
-        .admin-dialog-content .ui-inputfield {
-            width: 250px;
-        }
-        .admin-dialog-content .ui-button {
-            width: 100%;
-            padding: 10px;
-            font-size: 1.1em;
-        }
-    </style>
+    </script>
 </h:head>
 <h:body>
     <p:growl id="messages" showDetail="true" />
-    <div class="header-panel">
-        <div style="grid-column: 1;"></div>
-        <div class="logo-container" ondblclick="PF('adminLoginDialogWidget').show()">
-            <h:graphicImage library="img" name="KASS_icone.png" alt="Logo KASS" width="120"/>
+    
+    <header class="app-header">
+        <div class="header-left">
+            <div class="logo-container" ondblclick="PF('adminLoginDialogWidget').show()">
+                <h:graphicImage library="img" name="KASS_icone.png" alt="KASS Logo"/>
+            </div>
         </div>
-        <div class="customer-info-wrapper">
-            <p:outputPanel id="customerPanel">
-                <div class="customer-info">
-                    <strong>Cliente:</strong>
-                    <h:outputText value=" #{posBean.currentCustomer.name} (NIT: #{posBean.currentCustomer.nit})" rendered="#{posBean.currentCustomer != null}"/>
-                    <h:outputText value=" Consumidor Final" rendered="#{posBean.currentCustomer == null}"/>
-                </div>
+        <div class="header-right">
+            <p:commandButton value="Identificar Cliente" icon="pi pi-user-edit" 
+                             oncomplete="PF('customerDialogWidget').show()" process="@this"
+                             styleClass="header-button" />
+            <p:outputPanel id="customerInfoPanel" styleClass="customer-info">
+                <strong>Cliente:</strong>
+                <h:outputText value=" #{posBean.currentCustomer.name} (NIT: #{posBean.currentCustomer.nit})" />
             </p:outputPanel>
         </div>
-    </div>
-    
-    <h:form id="mainForm">
-        <p:remoteCommand name="remoteSearch"
-                         actionListener="#{posBean.findProductAndShowDialog()}"
-                         update=":confirmDialog"
-                         oncomplete="if (args &amp;&amp; args.validationFailed) { return; } PF('confirmDialogWidget').show();"/>
+    </header>
 
-        <p:outputPanel id="totalPanel">
-             <div class="total-display">
-                TOTAL:
-                <h:outputText value="#{posBean.totalAmount}">
-                    <f:convertNumber type="currency" currencySymbol="Q "/>
-                </h:outputText>
-            </div>
-        </p:outputPanel>
+    <main class="main-content">
+        <h:form id="mainForm">
+            <p:outputPanel id="totalPanel">
+                 <div class="total-display">
+                     <h:outputText value="#{posBean.totalAmount}">
+                         <f:convertNumber type="currency" currencySymbol="Q "/>
+                     </h:outputText>
+                 </div>
+            </p:outputPanel>
 
-        <div class="content-card">
-            <p:dataTable id="productsTable" var="product" value="#{posBean.products}" rows="8" paginator="true"
-                         emptyMessage="No hay productos en la venta.">
-                <p:column headerText="Código"><h:outputText value="#{product.barcode}" /></p:column>
-                <p:column headerText="Producto"><h:outputText value="#{product.name}" /></p:column>
-                <p:column headerText="Cantidad" style="text-align:center"><h:outputText value="#{product.quantity}" /></p:column>
-                <p:column headerText="Precio Unit." style="text-align:right">
-                    <h:outputText value="#{product.price}"><f:convertNumber type="currency" currencySymbol="Q"/></h:outputText>
-                </p:column>
-                <p:column headerText="Total" style="text-align:right">
-                    <h:outputText value="#{product.total}"><f:convertNumber type="currency" currencySymbol="Q"/></h:outputText>
-                </p:column>
-            </p:dataTable>
-
-            <div class="actions-panel">
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <p:outputLabel for="barcode" value="Escanear Producto:" style="font-weight:bold;"/>
-                    <p:inputText id="barcode" value="#{posBean.barcode}" placeholder="Ingrese código de barras" maxlength="13">
-                        <p:ajax event="keyup" oncomplete="if (this.value.length === 13) { remoteSearch(); }" />
-                    </p:inputText>
-                    <p:commandButton value="Buscar Producto" icon="pi pi-search" oncomplete="PF('searchDialogWidget').show();" update=":searchForm"/>
+            <h:panelGroup id="cartSection" layout="block">
+                <div class="content-card" rendered="#{not empty posBean.shoppingCart}">
+                    <p:dataTable id="cartTable" var="item" value="#{posBean.shoppingCart}" emptyMessage="No products in cart." rows="5" paginator="true">
+                        <p:column headerText="Product"><h:outputText value="#{item.product.name}" /></p:column>
+                        <p:column headerText="Quantity" style="text-align:center"><h:outputText value="#{item.quantity}" /></p:column>
+                        <p:column headerText="Unit Price" style="text-align:right"><h:outputText value="#{item.product.salePrice}"><f:convertNumber type="currency" currencySymbol="Q"/></h:outputText></p:column>
+                        <p:column headerText="Subtotal" style="text-align:right"><h:outputText value="#{item.subtotal}"><f:convertNumber type="currency" currencySymbol="Q"/></h:outputText></p:column>
+                        <p:column style="width:50px; text-align:center;">
+                            <p:commandButton icon="pi pi-times" styleClass="ui-button-danger rounded-button"
+                                             actionListener="#{posBean.selectItemForRemoval(item)}"
+                                             oncomplete="PF('authorizationDialogWidget').show()"
+                                             process="@this"
+                                             update=":authorizationForm">
+                                <f:setPropertyActionListener target="#{posBean.itemToRemove}" value="#{item}" />
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
                 </div>
-                
-                <p:commandButton value="Pagar" actionListener="#{posBean.checkout}"
-                               update="@form :customerPanel :messages" styleClass="ui-button-success"
-                               icon="pi pi-check-circle"/>
-            </div>
-        </div>
-    </h:form>
+            </h:panelGroup>
 
-    <p:dialog header="Confirmar Producto" widgetVar="confirmDialogWidget" modal="true" responsive="true" id="confirmDialog">
+            <p:outputPanel id="actionsPanelWrapper">
+                <div class="content-card" style="#{not empty posBean.shoppingCart ? 'border-top: none; border-top-left-radius: 0; border-top-right-radius: 0;' : ''}">
+                    <div class="actions-panel">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <p:outputLabel for="barcode" value="Scan Product:" style="font-weight:bold;"/>
+                            <p:inputText id="barcode" value="#{posBean.barcode}" placeholder="Enter barcode" maxlength="13">
+                                <p:ajax event="keyup" listener="#{posBean.findProductByBarcode}"
+                                        update=":mainForm:confirmDialog" 
+                                        oncomplete="handleScanComplete(args)"/>
+                            </p:inputText>
+                            <p:commandButton value="Search Product" icon="pi pi-search" 
+                                             actionListener="#{posBean.clearSearchResults}"
+                                             oncomplete="PF('searchDialogWidget').show()"
+                                             update=":mainForm:searchDialogContent"
+                                             process="@this"/>
+                        </div>
+                        <p:commandButton value="Pay" actionListener="#{posBean.checkout}"
+                            update="@form :customerInfoPanel :messages" 
+                            styleClass="ui-button-success"
+                              icon="pi pi-check-circle" rendered="#{not empty posBean.shoppingCart}"/>
+                    </div>
+                </div>
+            </p:outputPanel> 
+
+            <p:dialog header="Confirmar Producto" widgetVar="confirmDialogWidget" modal="true" id="confirmDialog" 
+                      closable="false" resizable="false"
+                      onShow="PF('confirmButtonWidget').jq.focus()">
+                <p:outputPanel rendered="#{not empty posBean.foundProduct}">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h:outputText value="¿Desea agregar este producto?" style="font-size: 1.2em;"/>
+                    </div>
+                    <h:panelGrid columns="2" styleClass="dialog-grid">
+                        <h:outputText value="Producto:" style="font-weight:bold;"/> <h:outputText value="#{posBean.foundProduct.name}" />
+                        <h:outputText value="Precio:" style="font-weight:bold;"/> <h:outputText value="#{posBean.foundProduct.salePrice}"><f:convertNumber type="currency" currencySymbol="Q"/></h:outputText>
+                    </h:panelGrid>
+                    <br/>
+                    <div style="display: flex; justify-content: space-around; gap: 10px;">
+                        <p:commandButton value="Confirmar (Enter)" icon="pi pi-check"
+                                         widgetVar="confirmButtonWidget"
+                                         actionListener="#{posBean.addProductToSale}"
+                                         oncomplete="PF('confirmDialogWidget').hide();"
+                                         update=":mainForm:cartSection :mainForm:totalPanel :mainForm:barcode :messages :mainForm:actionsPanelWrapper"
+                                         styleClass="ui-button-success"/>
+                        <p:commandButton value="Cancelar (Esc)" icon="pi pi-times"
+                                         actionListener="#{posBean.cancelAddProduct}"
+                                         oncomplete="PF('confirmDialogWidget').hide();"
+                                         update=":mainForm:barcode"
+                                         styleClass="ui-button-danger"/>
+                    </div>
+                    <p:hotkey bind="return" actionListener="#{posBean.addProductToSale}" 
+                              oncomplete="PF('confirmDialogWidget').hide();"
+                              update=":mainForm:cartSection :mainForm:totalPanel :mainForm:barcode :messages :mainForm:actionsPanelWrapper" />
+                    <p:hotkey bind="esc" actionListener="#{posBean.cancelAddProduct}" 
+                              oncomplete="PF('confirmDialogWidget').hide();"
+                              update=":mainForm:barcode" />
+                </p:outputPanel>
+            </p:dialog>
+            
+            <p:dialog header="Search Product" widgetVar="searchDialogWidget" modal="true" width="650">
+                <p:outputPanel id="searchDialogContent">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <p:outputLabel for="searchTerm" value="Product name:"/>
+                        <p:inputText id="searchTerm" value="#{posBean.searchTerm}" style="flex-grow: 1;"/>
+                        <p:commandButton value="Search" actionListener="#{posBean.performSearch}" update=":mainForm:searchResultsTable"/>
+                    </div>
+                    <div class="alphabet-filter" style="margin-bottom: 15px; text-align: center;">
+                        <ui:repeat value="#{posBean.alphabet}" var="letter">
+                            <p:commandButton value="#{letter}" actionListener="#{posBean.filterByFirstLetter(letter)}" 
+                                             update=":mainForm:searchResultsTable" style="margin: 2px; width: 35px;"/>
+                        </ui:repeat>
+                    </div>
+                    <p:dataTable id="searchResultsTable" var="result" value="#{posBean.searchResults}" 
+                                 emptyMessage="No products found." scrollable="true" scrollHeight="250">
+                        <p:column headerText="Name" style="width: 60%;"><h:outputText value="#{result.name}"/></p:column>
+                        <p:column headerText="Price" style="width: 20%; text-align:right;"><h:outputText value="#{result.salePrice}"><f:convertNumber type="currency" currencySymbol="Q "/></h:outputText></p:column>
+                        <p:column style="width: 20%; text-align:center;"><p:commandButton value="Add" actionListener="#{posBean.addProductFromSearch(result)}" 
+                                             update=":mainForm:cartSection :mainForm:totalPanel :messages :mainForm:actionsPanelWrapper" 
+                                             oncomplete="PF('searchDialogWidget').hide()"/></p:column>
+                    </p:dataTable>
+                </p:outputPanel>
+            </p:dialog>
+        </h:form> </main>
+
+    <p:dialog header="Admin Access" widgetVar="adminLoginDialogWidget" modal="true"
+              width="350" responsive="true">
         <h:form>
-            <h:panelGrid columns="2">
-                <h:outputText value="Código:"/>
-                <h:outputText value="#{posBean.foundProduct.barcode}"/>
+             <p:panelGrid columns="2" styleClass="dialog-grid">
+                <p:outputLabel for="adminUser" value="Username:"/>
+                <p:inputText id="adminUser" value="#{adminBean.username}" required="true" style="width: 100%"/>
                 
-                <h:outputText value="Producto:"/>
-                <h:outputText value="#{posBean.foundProduct.name}"/>
-                
-                <h:outputText value="Precio:"/>
-                <h:outputText value="#{posBean.foundProduct.price}">
-                    <f:convertNumber type="currency" currencySymbol="Q"/>
-                </h:outputText>
-                
-                <h:outputText value="Cantidad:"/>
-                <p:spinner value="#{posBean.foundProductQuantity}" min="1" max="99"/>
-            </h:panelGrid>
-            <f:facet name="footer">
-                <p:commandButton value="Agregar" actionListener="#{posBean.addProductToSale()}"
-                                 oncomplete="PF('confirmDialogWidget').hide();"
-                                 update=":mainForm:productsTable :mainForm:totalPanel :mainForm:barcode :messages"/>
-                <p:commandButton value="Cancelar" onclick="PF('confirmDialogWidget').hide();"/>
-            </f:facet>
+                <p:outputLabel for="adminPass" value="Password:"/>
+                <p:password id="adminPass" value="#{adminBean.password}" required="true" style="width: 100%"/>
+            </p:panelGrid>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <p:commandButton value="Login" action="#{adminBean.login}" update=":messages"/>
+            </div>
         </h:form>
     </p:dialog>
 
-    <p:dialog header="Identificación del Cliente" widgetVar="customerLoginDialogWidget" modal="true" closable="false" responsive="true">
-        <h:form id="customerLoginForm">
-            <p:panelGrid columns="2">
+    <p:dialog header="Identify Customer" widgetVar="customerDialogWidget" modal="true"
+              width="350" responsive="true">
+        <h:form>
+            <p:panelGrid columns="2" styleClass="dialog-grid">
                 <p:outputLabel for="nit" value="NIT:"/>
-                <p:inputText id="nit" value="#{posBean.customerNit}" required="true" requiredMessage="El NIT es requerido."/>
+                <p:inputText id="nit" value="#{posBean.customerNit}" required="true" style="width: 100%"/>
+                
                 <p:outputLabel for="name" value="Nombre:"/>
-                <p:inputText id="name" value="#{posBean.customerName}" required="true" requiredMessage="El Nombre es requerido."/>
+                <p:inputText id="name" value="#{posBean.customerName}" required="true" style="width: 100%"/>
             </p:panelGrid>
-            <br/>
-            <p:commandButton value="Continuar Compra" actionListener="#{posBean.registerCustomer}"
-                             oncomplete="PF('customerLoginDialogWidget').hide();" 
-                             update=":mainForm:productsTable :mainForm:totalPanel :mainForm:barcode :customerPanel :messages"/>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <p:commandButton value="Save Customer" actionListener="#{posBean.registerCustomer}" 
+                                 update=":customerInfoPanel :messages :mainForm:cartSection :mainForm:totalPanel :mainForm:actionsPanelWrapper"/>
+            </div>
         </h:form>
     </p:dialog>
 
-    <p:dialog header="Acceso de Administrador" widgetVar="adminLoginDialogWidget" modal="true" responsive="true">
-        <h:form id="adminLoginForm">
-             <p:panelGrid columns="2">
-                <p:outputLabel for="adminUser" value="Usuario:"/>
-                <p:inputText id="adminUser" value="#{adminBean.username}" required="true"/>
-                <p:outputLabel for="adminPass" value="Contraseña:"/>
-                <p:password id="adminPass" value="#{adminBean.password}" required="true"/>
-            </p:panelGrid>
-            <br/>
-            <p:commandButton value="Ingresar" action="#{adminBean.login}" update=":messages"/>
+    <p:dialog header="Autorización Requerida" widgetVar="authorizationDialogWidget" modal="true"
+              closable="false" resizable="false" width="350">
+        <h:form id="authorizationForm">
+            <p:remoteCommand name="updateAuthPanel" update="authPanel" process="@this" />
+            
+            <div style="text-align: center; margin-bottom: 15px;">
+                <h:outputText value="Un supervisor debe escanear su gafete para quitar el producto." />
+            </div>
+            <p:outputPanel id="authPanel">
+                <p:outputPanel rendered="#{not empty posBean.itemToRemove}">
+                    <h:panelGrid columns="2" styleClass="dialog-grid">
+                        <h:outputText value="Producto:" style="font-weight:bold;"/>
+                        <h:outputText value="#{posBean.itemToRemove.product.name}"/>
+                        <h:outputText value="Cantidad:" style="font-weight:bold;"/>
+                        <h:outputText value="#{posBean.itemToRemove.quantity}"/>
+                    </h:panelGrid>
+                </p:outputPanel>
+            </p:outputPanel>
+            <hr/>
+            <h:panelGrid columns="1" style="width:100%; margin-top: 15px;">
+                <p:outputLabel for="authCode" value="Escanear Código de Supervisor:"/>
+                <p:password id="authCode" value="#{posBean.authorizationCode}" required="true" style="width:100%;" />
+                <p:commandButton value="Autorizar" icon="pi pi-check-circle" 
+                                 actionListener="#{posBean.authorizeAndRemoveItem}"
+                                 update=":messages :authorizationForm:authPanel :mainForm:cartSection :mainForm:totalPanel"
+                                 styleClass="ui-button-success" style="margin-top:10px;"/>
+            </h:panelGrid>
         </h:form>
     </p:dialog>
     
-    <p:dialog header="Buscar Producto" widgetVar="searchDialogWidget" modal="true" width="600" responsive="true">
-        <h:form id="searchForm">
-            <p:panelGrid columns="3" style="margin-bottom:10px;">
-                <p:outputLabel for="searchTerm" value="Nombre del producto:"/>
-                <p:inputText id="searchTerm" value="#{posBean.searchTerm}"/>
-                <p:commandButton value="Buscar" action="#{posBean.performSearch}" update="searchResultsTable"/>
-            </p:panelGrid>
-            <p:dataTable id="searchResultsTable" var="result" value="#{posBean.searchResults}" emptyMessage="No se encontraron productos.">
-                <p:column headerText="Nombre"><h:outputText value="#{result.name}"/></p:column>
-                <p:column headerText="Precio"><h:outputText value="#{result.price}"><f:convertNumber type="currency" currencySymbol="Q "/></h:outputText></p:column>
-                <p:column>
-                    <p:commandButton value="Agregar" actionListener="#{posBean.addProductFromSearch(result)}" 
-                                     update=":mainForm:productsTable :mainForm:totalPanel" 
-                                     oncomplete="PF('searchDialogWidget').hide()"/>
-                </p:column>
-            </p:dataTable>
-        </h:form>
-    </p:dialog>
-
-    <div class="footer-info">
-        KASS POS v2.1 - Versión Estable Restaurada
-    </div>
 </h:body>
 </html>

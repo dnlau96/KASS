@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>KASS - Product Management</title>
+    </h:head>
+
+<h:body>
+    <div class="page-container"> 
+        <div class="page-header">
+            <h2>Product Management</h2>
+            <div class="nav-buttons">
+                <h:form style="display: inline;">
+                    <p:commandButton value="Back to Dashboard" 
+                                     action="dashboard?faces-redirect=true" 
+                                     icon="pi pi-arrow-left"/>
+                </h:form>
+                <h:form style="display: inline;">
+                     <p:commandButton value="Logout" 
+                                      action="#{loginBean.logout}"  
+                                      icon="pi pi-sign-out" 
+                                      styleClass="ui-button-warning"/>
+                </h:form>
+            </div>
+        </div>
+        
+        <h:form id="form">
+            <p:toolbar>
+                <p:toolbarGroup>
+                    <p:commandButton value="New Product" 
+                                     icon="pi pi-plus"
+                                     actionListener="#{productBean.openNew}"
+                                     oncomplete="PF('productDialog').show()"
+                                     styleClass="ui-button-success"
+                                     update=":dialogs:manage-product-content" />
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dataTable id="dt-products" var="prod" value="#{productBean.products}"
+                         paginator="true" rows="10" emptyMessage="No products found.">
+                
+                <p:column headerText="Barcode" sortBy="#{prod.barcode}">
+                    <h:outputText value="#{prod.barcode}" />
+                </p:column>
+                
+                <p:column headerText="Name" sortBy="#{prod.name}">
+                    <h:outputText value="#{prod.name}" />
+                </p:column>
+                
+                <p:column headerText="Sale Price" sortBy="#{prod.salePrice}">
+                    <h:outputText value="#{prod.salePrice}">
+                        <f:convertNumber type="currency" currencySymbol="Q " /> 
+                    </h:outputText>
+                </p:column>
+
+                <p:column headerText="Current Stock" sortBy="#{prod.currentStock}">
+                    <h:outputText value="#{prod.currentStock}" />
+                </p:column>
+
+                <p:column headerText="Actions" style="width:10rem; text-align: center;">
+                    <p:commandButton icon="pi pi-pencil" 
+                                     styleClass="rounded-button ui-button-success"
+                                     oncomplete="PF('productDialog').show()"
+                                     update=":dialogs:manage-product-content">
+                        <f:setPropertyActionListener value="#{prod}" target="#{productBean.selectedProduct}" />
+                    </p:commandButton>
+                    <p:commandButton icon="pi pi-trash" 
+                                     styleClass="rounded-button ui-button-danger"
+                                     process="@this"
+                                     oncomplete="PF('deleteProductDialog').show()">
+                        <f:setPropertyActionListener value="#{prod}" target="#{productBean.selectedProduct}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+
+        <h:form id="dialogs">
+            <p:dialog header="Product Details" 
+                      widgetVar="productDialog" 
+                      modal="true" 
+                      showEffect="fade" 
+                      hideEffect="fade" 
+                      resizable="false">
+                
+                <p:outputPanel id="manage-product-content" class="ui-fluid">
+                    <p:panelGrid columns="2" rendered="#{not empty productBean.selectedProduct}">
+                        
+                        <p:outputLabel for="barcode" value="Barcode" />
+                        <p:inputText id="barcode" value="#{productBean.selectedProduct.barcode}" required="true" />
+                        
+                        <p:outputLabel for="name" value="Name" />
+                        <p:inputText id="name" value="#{productBean.selectedProduct.name}" required="true" />
+
+                        <p:outputLabel for="salePrice" value="Sale Price" />
+                        <p:inputNumber id="salePrice" value="#{productBean.selectedProduct.salePrice}" 
+                                       symbol="Q " decimalPlaces="2" required="true" />
+                        
+                        <p:outputLabel for="currentStock" value="Current Stock" />
+                        <p:inputNumber id="currentStock" value="#{productBean.selectedProduct.currentStock}" 
+                                       decimalPlaces="0" required="true" readonly="true"/>
+                        
+                        
+                                       
+                    </p:panelGrid>
+                </p:outputPanel>
+
+                <f:facet name="footer">
+                    <p:commandButton value="Save" 
+                                     icon="pi pi-check" 
+                                     actionListener="#{productBean.saveProduct}"
+                                     update="manage-product-content"
+                                     process="manage-product-content @this" />
+                    <p:commandButton value="Cancel" 
+                                     icon="pi pi-times" 
+                                     onclick="PF('productDialog').hide()" 
+                                     class="ui-button-secondary" />
+                </f:facet>
+            </p:dialog>
+
+            <p:confirmDialog widgetVar="deleteProductDialog" 
+                             showEffect="fade" 
+                             width="300"
+                             message="Delete this product?" 
+                             header="Confirm" 
+                             severity="alert">
+                <p:commandButton value="Yes" 
+                                 icon="pi pi-check" 
+                                 actionListener="#{productBean.deleteProduct}"
+                                 process="@this" 
+                                 oncomplete="PF('deleteProductDialog').hide()" />
+                <p:commandButton value="No" 
+                                 icon="pi pi-times" 
+                                 styleClass="ui-button-secondary"
+                                 onclick="PF('deleteProductDialog').hide()" />
+            </p:confirmDialog>
+        </h:form>
+    </div>
+</h:body>
+</html>

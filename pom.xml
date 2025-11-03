@@ -1,35 +1,48 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>lau</groupId>
+
+    <groupId>lau.kass2</groupId>
     <artifactId>KASS2</artifactId>
-    <version>2</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>KASS2-2</name>
-    
+
+    <name>KASS2</name>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jakartaee>11.0.0-M1</jakartaee>
+        <maven.compiler.release>17</maven.compiler.release> <!-- Mejor práctica para Java 17+ -->
+        <jakartaee.version>11.0.0</jakartaee.version> <!-- Versión para Jakarta EE 11 -->
+        <primefaces.version>14.0.0</primefaces.version>
     </properties>
-    
+
     <dependencies>
+        <!-- API de Jakarta EE 11 Web Profile -->
         <dependency>
             <groupId>jakarta.platform</groupId>
-            <artifactId>jakarta.jakartaee-api</artifactId>
-            <version>${jakartaee}</version>
-            <scope>provided</scope>
+            <artifactId>jakarta.jakartaee-web-api</artifactId>
+            <version>${jakartaee.version}</version>
+            <scope>provided</scope> <!-- 'provided' porque el servidor Payara ya lo incluye -->
+        </dependency>
+
+        <!-- Dependencia de PrimeFaces para Jakarta EE -->
+        <dependency>
+            <groupId>org.primefaces</groupId>
+            <artifactId>primefaces</artifactId>
+            <version>${primefaces.version}</version>
+            <classifier>jakarta</classifier> <!-- El clasificador 'jakarta' es crucial -->
         </dependency>
     </dependencies>
-    
+
     <build>
+        <finalName>KASS2</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.12.1</version>
+                <version>3.13.0</version>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
+                    <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
             <plugin>
@@ -39,4 +52,15 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- Repositorio oficial de PrimeFaces -->
+    <repositories>
+        <repository>
+            <id>prime-repo</id>
+            <name>PrimeFaces Maven Repository</name>
+            <url>https://repository.primefaces.org</url>
+        </repository>
+    </repositories>
+
 </project>
+

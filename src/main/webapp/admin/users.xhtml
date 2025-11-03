@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<h:head>
+    <title>KASS - User Management</title>
+    <h:outputStylesheet library="css" name="style.css" />
+</h:head>
+<h:body>
+    <div class="admin-header">
+        <h1><i class="pi pi-users" style="margin-right: 10px;"></i>User Management</h1>
+        <h:form>
+            <p:commandButton value="Back to Dashboard" action="dashboard.xhtml?faces-redirect=true" icon="pi pi-arrow-left"/>
+            <p:commandButton value="Logout" action="#{adminBean.logout}" icon="pi pi-sign-out" style="margin-left: 10px;"/>
+        </h:form>
+    </div>
+
+    <div class="admin-container">
+        <h:form id="form">
+            <p:growl id="messages" showDetail="true"/>
+            <div class="admin-card">
+                <p:toolbar>
+                    <p:toolbarGroup>
+                        <p:commandButton value="New User" icon="pi pi-plus" 
+                                         actionListener="#{userBean.openNew}"
+                                         update=":form:manage-user-content" 
+                                         oncomplete="PF('userDialogWidget').show()"
+                                         process="@this"/>
+                    </p:toolbarGroup>
+                </p:toolbar>
+                
+                <p:dataTable id="dt-users" var="user" value="#{userBean.userList}"
+                             emptyMessage="No users found." paginator="true" rows="10">
+                    <p:column headerText="Username" sortBy="#{user.username}">
+                        <h:outputText value="#{user.username}" />
+                    </p:column>
+                    <p:column headerText="Role" sortBy="#{user.role}">
+                        <h:outputText value="#{user.role}" />
+                    </p:column>
+                    <p:column headerText="Badge Code (Gafete)">
+                        <h:outputText value="#{user.badgeCode}" />
+                    </p:column>
+                    <p:column headerText="Actions" style="width:7rem;text-align:center">
+                        <p:commandButton icon="pi pi-pencil" update=":form:manage-user-content"
+                                         oncomplete="PF('userDialogWidget').show()" 
+                                         styleClass="edit-button rounded-button ui-button-success" 
+                                         process="@this">
+                            <f:setPropertyActionListener value="#{user}" target="#{userBean.selectedUser}" />
+                        </p:commandButton>
+                        <p:commandButton class="ui-button-warning rounded-button" icon="pi pi-trash"
+                                         process="@this"
+                                         oncomplete="PF('deleteUserDialog').show()">
+                            <f:setPropertyActionListener value="#{user}" target="#{userBean.selectedUser}" />
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </div>
+
+            <h:panelGroup id="dialogs">
+                <p:dialog header="User Details" showEffect="fade" modal="true" 
+                          widgetVar="userDialogWidget" responsive="true">
+                    
+                    <p:outputPanel id="manage-user-content" class="ui-fluid">
+                        <p:outputPanel rendered="#{not empty userBean.selectedUser}">
+                            <div class="p-field">
+                                <p:outputLabel for="username">Username</p:outputLabel>
+                                <p:inputText id="username" value="#{userBean.selectedUser.username}" required="true" />
+                            </div>
+                            <div class="p-field">
+                                <p:outputLabel for="role">Role</p:outputLabel>
+                                <p:selectOneMenu id="role" value="#{userBean.selectedUser.role}" required="true">
+                                    <f:selectItem itemLabel="Select a Role" itemValue="#{null}" noSelectionOption="true"/>
+                                    <f:selectItems value="#{userBean.availableRoles}" var="role"
+                                                   itemLabel="#{role.roleName}" itemValue="#{role.roleName}" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="p-field">
+                                <p:outputLabel for="badgeCode">Badge Code (Gafete)</p:outputLabel> 
+                                <p:inputText id="badgeCode" value="#{userBean.selectedUser.badgeCode}" maxlength="13"/>
+                            </div>
+                            <div class="p-field">
+                                <p:outputLabel for="password">Password</p:outputLabel>
+                                <p:password id="password" value="#{userBean.newPassword}" 
+                                            placeholder="#{not empty userBean.selectedUser.id ? 'Leave blank to keep current' : 'Set initial password'}"
+                                            required="#{empty userBean.selectedUser.id}"/>
+                            </div>
+                        </p:outputPanel>
+                    </p:outputPanel>
+                    
+                    <f:facet name="footer">
+                        <p:commandButton value="Save" icon="pi pi-check" 
+                                         actionListener="#{userBean.saveUser}"
+                                         update="manage-user-content :form:messages :form:dt-users" 
+                                         process="manage-user-content @this" />
+                        <p:commandButton value="Cancel" icon="pi pi-times" 
+                                         onclick="PF('userDialogWidget').hide()" class="ui-button-secondary" type="button"/>
+                    </f:facet>
+                </p:dialog>
+
+                <p:confirmDialog widgetVar="deleteUserDialog" showEffect="fade" width="300"
+                                 message="Are you sure you want to delete this user?" 
+                                 header="Confirm" severity="warn">
+                    
+                    <p:commandButton value="Yes" icon="pi pi-check" 
+                                     actionListener="#{userBean.deleteUser}"
+                                     update=":form:dt-users :form:messages"
+                                     oncomplete="PF('deleteUserDialog').hide()" />
+                    <p:commandButton value="No" type="button" styleClass="ui-button-secondary" 
+                                     icon="pi pi-times" onclick="PF('deleteUserDialog').hide()" />
+                </p:confirmDialog>
+                
+            </h:panelGroup>
+            
+        </h:form> </div>
+</h:body>
+</html>

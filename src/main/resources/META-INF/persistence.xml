@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
-    <!-- Define Persistence Unit -->
-    <persistence-unit name="my_persistence_unit">
-        
-    </persistence-unit>
+  
+  <persistence-unit name="KassPU" transaction-type="JTA"> <jta-data-source>jdbc/kassDB</jta-data-source>
+    
+    <class>lau.kass2.models.Product</class>  
+    <class>lau.kass2.models.Role</class> 
+    <class>lau.kass2.models.Sale</class>
+    <class>lau.kass2.models.Customer</class>
+    <class>lau.kass2.models.SaleDetail</class>
+    <class>lau.kass2.models.User</class>
+    <class>lau.kass2.models.InventoryMovement</class>
+    <properties>
+      <property name="jakarta.persistence.schema-generation.database.action" value="update"/>
+    </properties>
+    
+  </persistence-unit>
 </persistence>

@@ -130,28 +130,85 @@
                 </h:form>
                 <br/>
 
-                <h:form id="form-movements">
-                    <p:panel header="Últimos Movimientos Registrados">
-                        <p:dataTable id="dt-movements" var="mov" value="#{kardexBean.movements}"
-                             paginator="true" rows="20" emptyMessage="No se han registrado movimientos.">
+            <h:form id="form-movements">
+                <p:panel header="Últimos Movimientos Registrados">
 
-                            <p:column headerText="Tipo" filterBy="#{mov.movementType}" filterMatchMode="exact">
-                                <f:facet name="filter">
-                                    <p:selectOneMenu onchange="PF('dt-movements').filter()" styleClass="custom-filter">
-                                        <f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true" />
-                                        <f:selectItem itemLabel="Ingreso Factura" itemValue="INGRESO_FACTURA" />
-                                        <f:selectItem itemLabel="Error Ingreso" itemValue="AJUSTE_ERROR_INGRESO" />
-                                        <f:selectItem itemLabel="Faltante" itemValue="AJUSTE_FALTANTE" />
-                                        <f:selectItem itemLabel="Sobrante" itemValue="AJUSTE_SOBRANTE" />
-                                        <f:selectItem itemLabel="Dañado" itemValue="AJUSTE_DAÑADO" />
-                                    </p:selectOneMenu>
-                                </f:facet>
-                                <h:outputText value="#{mov.movementType}" />
-                            </p:column>
+                    <p:panelGrid columns="4" styleClass="ui-noborder" style="margin-bottom: 10px;">
+                        <p:outputLabel for="search-product" value="Buscar por Producto:" />
 
-                            </p:dataTable>
-                    </p:panel>
-                </h:form>
+                        <p:selectOneMenu id="search-product" 
+                                         value="#{kardexBean.searchProductId}" 
+                                         filter="true" filterMatchMode="contains" 
+                                         style="min-width: 250px;">
+                            <f:converter converterId="jakarta.faces.Long" />
+                            <f:selectItem itemLabel="Todos los productos" itemValue="#{null}" />
+                            <f:selectItems value="#{kardexBean.allProducts}" 
+                                           var="p" 
+                                           itemLabel="#{p.name} (#{p.barcode})" 
+                                           itemValue="#{p.id}" />
+                        </p:selectOneMenu>
 
-            </div> </h:body>
-        </html>
+                        <p:commandButton value="Buscar" 
+                                         icon="pi pi-search"
+                                         action="#{kardexBean.searchMovements}"
+                                         update="dt-movements" />
+
+                        <p:commandButton value="Mostrar Todos" 
+                                         icon="pi pi-refresh"
+                                         action="#{kardexBean.clearSearch}"
+                                         update="dt-movements @form:search-product" 
+                                         process="@this"
+                                         styleClass="ui-button-secondary"/>
+                    </p:panelGrid>
+
+
+                    <p:dataTable id="dt-movements" var="mov" value="#{kardexBean.movements}"
+                                 widgetVar="dt-movements" paginator="true" rows="20" 
+                                 emptyMessage="No se han registrado movimientos.">
+
+                        <p:column headerText="Fecha" sortBy="#{mov.movementDateAsDate}" style="width: 10rem">
+                            <h:outputText value="#{mov.movementDateAsDate}">
+                               <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column headerText="Producto" filterBy="#{mov.product.name}" filterMatchMode="contains">
+                            <h:outputText value="#{mov.product.name}" />
+                        </p:column>
+
+                        <p:column headerText="Cantidad" sortBy="#{mov.quantity}" style="width: 6rem; text-align: center;">
+                            <h:outputText value="#{mov.quantity}" 
+                                          style="color: #{mov.quantity > 0 ? 'green' : 'red'}; font-weight: bold;" />
+                        </p:column>
+
+                        <p:column headerText="Tipo" filterBy="#{mov.movementType}" filterMatchMode="exact" style="width: 12rem">
+                            <f:facet name="filter">
+                                <p:selectOneMenu onchange="PF('dt-movements').filter()" styleClass="custom-filter">
+                                    <f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true" />
+
+                                    <f:selectItem itemLabel="Salida por Venta" itemValue="SALIDA_VENTA" />
+
+                                    <f:selectItem itemLabel="Ingreso Factura" itemValue="INGRESO_FACTURA" />
+                                    <f:selectItem itemLabel="Error Ingreso" itemValue="AJUSTE_ERROR_INGRESO" />
+                                    <f:selectItem itemLabel="Faltante" itemValue="AJUSTE_FALTANTE" />
+                                    <f:selectItem itemLabel="Sobrante" itemValue="AJUSTE_SOBRANTE" />
+                                    <f:selectItem itemLabel="Dañado" itemValue="AJUSTE_DAÑADO" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <h:outputText value="#{mov.movementType}" />
+                        </p:column>
+
+                        <p:column headerText="Referencia">
+                            <h:outputText value="#{mov.reference}" />
+                        </p:column>
+
+                        <p:column headerText="Usuario" filterBy="#{mov.user.username}" filterMatchMode="contains" style="width: 8rem">
+                            <h:outputText value="#{mov.user.username}" />
+                        </p:column>
+
+                    </p:dataTable>
+                </p:panel>
+        </h:form>
+        
+    </div> </h:body>
+</html>
