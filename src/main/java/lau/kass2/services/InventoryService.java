@@ -57,4 +57,6 @@ public class InventoryService {
                  .setParameter("productId", productId)
                  .getResultList();
     }
+    
+    
 }

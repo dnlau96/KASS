@@ -25,11 +25,7 @@
                                  action="dashboard?faces-redirect=true"
                                  icon="pi pi-arrow-left"
                                  styleClass="header-button"/> </h:form>
-            <h:form style="display: inline;">
-                <p:commandButton value="Logout"
-                                 action="#{loginBean.logout}"
-                                 icon="pi pi-sign-out"
-                                 styleClass="ui-button-danger"/> </h:form>
+            
         </div>
     </div>
 
@@ -60,12 +56,8 @@
                                                  action="#{kardexBean.searchMovements}"
                                                  update="dt-movements" />
 
-                                <p:commandButton value="Mostrar Todos"
-                                                 icon="pi pi-refresh"
-                                                 action="#{kardexBean.clearSearch}"
-                                                 update="dt-movements @form:search-product"
-                                                 process="@this"/>
-                            </p:panelGrid>
+                                
+                                 </p:panelGrid>
 
                             <p:dataTable id="dt-movements" var="mov" value="#{kardexBean.movements}"
                                          widgetVar="dt-movements" paginator="true" rows="20"

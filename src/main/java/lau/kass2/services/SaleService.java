@@ -98,7 +98,14 @@ public class SaleService {
         return sale;
     }
 
-    public List<Sale> getAllSales() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    @Transactional
+public List<Sale> getAllSales() {
+    String jpql = "SELECT s FROM Sale s " +
+                  "JOIN FETCH s.customer " +
+                  "JOIN FETCH s.user " +
+                  "ORDER BY s.saleDate DESC";
+    
+    // Asegúrate de que 'em' (EntityManager) esté inyectado en SaleService
+    return em.createQuery(jpql, Sale.class).getResultList();
+}
 }

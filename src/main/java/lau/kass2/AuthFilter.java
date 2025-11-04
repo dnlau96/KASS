@@ -24,12 +24,10 @@ public class AuthFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
         HttpSession session = req.getSession(false); 
 
-        // --- LÍNEA CORREGIDA ---
-        // Comparamos el objeto 'session' con la palabra clave 'null'
+        
         AdminBean adminBean = (session != null) ? (AdminBean) session.getAttribute("adminBean") : null;
         
-        // --- LÍNEA CORREGIDA ---
-        // Comparamos el objeto 'adminBean' con la palabra clave 'null'
+        
         User currentUser = (adminBean != null) ? adminBean.getCurrentUser() : null;
         
         if (currentUser == null) {
@@ -60,7 +58,7 @@ public class AuthFilter implements Filter {
         res.sendRedirect(req.getContextPath() + "/index.xhtml");
     }
 
-    // Dejamos los otros métodos vacíos o como los tengas
+  
     @Override
     public void init(jakarta.servlet.FilterConfig filterConfig) throws ServletException {
     }

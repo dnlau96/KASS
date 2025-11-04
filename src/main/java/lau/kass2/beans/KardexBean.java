@@ -63,12 +63,7 @@ public class KardexBean implements Serializable {
         this.adjustmentTypes.add("AJUSTE_DAÑADO");
     }
 
-    // --- MÉTODOS CORREGIDOS ---
-
-    /**
-     * CORREGIDO: Renombrado de 'onProductSelect' (en mi código anterior) a 'searchMovements'
-     * para que coincida con tu lógica
-     */
+    
     public void searchMovements() {
         if (searchProductId != null) {
             // Llama al método que SÍ existe en tu InventoryService
@@ -84,6 +79,8 @@ public class KardexBean implements Serializable {
         this.movements = new ArrayList<>();
         this.selectedProduct = null;
     }
+    
+    
 
     public void saveStockEntry() {
         try {
