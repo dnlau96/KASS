@@ -1,3 +1,4 @@
+
 package lau.kass2.beans;
 
 import jakarta.annotation.PostConstruct;
@@ -217,7 +218,7 @@ public class PosBean implements Serializable {
             }
 
             // 2. Llamar al servicio para que haga todo el trabajo
-            Sale completedSale = saleService.createSale(shoppingCart, customer, currentUser, totalAmount);
+            Sale completedSale = saleService.createSale(shoppingCart, customer.getNit(), customer.getName(), totalAmount);
 
             // 3. Limpiar todo y dar mensaje de éxito
             addMessage(FacesMessage.SEVERITY_INFO, "¡Pago Exitoso!", "Venta #" + completedSale.getId() + " registrada. Gracias por su compra.");

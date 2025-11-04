@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>KASS - Reporte de Ventas</title>
+    <h:outputStylesheet name="css/style.css" />
+</h:head>
+<h:body>
+
+    <div class="app-header">
+        <div class="header-left">
+            <div class="logo-container">
+                <h:graphicImage library="img" name="KASS_icone.png" alt="KASS Logo"/>
+                
+            </div>
+            <h:outputText value="Reporte de Ventas" style="font-size: 1.5em; font-weight: bold; color: var(--text-color);" />
+        </div>
+        <div class="header-right">
+            <h:form>
+                <p:commandButton value="Volver al Dashboard"
+                                 action="dashboard?faces-redirect=true"
+                                 icon="pi pi-arrow-left"
+                                 styleClass="header-button"/>
+            </h:form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="content-card">
+            <h:form id="formReportes">
+                <p:panel header="Filtros de Búsqueda (Opcional)">
+                    <p:commandButton value="Refrescar Lista" 
+                                     icon="pi pi-refresh"
+                                     action="#{reportBean.loadAllSales}"
+                                     update="salesTable"/>
+                </p:panel>
+                
+                <p:separator />
+
+                <p:dataTable id="salesTable" var="sale" value="#{reportBean.salesList}"
+                             paginator="true" rows="15"
+                             emptyMessage="No se encontraron ventas registradas."
+                             rowKey="#{sale.id}">  <p:column style="width:2rem">
+                        <p:rowToggler />
+                    </p:column>
+
+                    <p:column headerText="Venta ID" sortBy="#{sale.id}">
+                        <h:outputText value="#{sale.id}" />
+                    </p:column>
+                    
+                    <p:column headerText="Fecha" sortBy="#{sale.saleDate}">
+                        <h:outputText value="#{sale.saleDate}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:column headerText="Cliente" sortBy="#{sale.customer.name}">
+                        <h:outputText value="#{sale.customer.name}" />
+                    </p:column>
+                    
+                    <p:column headerText="Vendedor" sortBy="#{sale.user.username}">
+                        <h:outputText value="#{sale.user.username}" />
+                    </p:column>
+                    
+                    <p:column headerText="Total" sortBy="#{sale.total}" style="text-align: right; font-weight: bold;">
+                        <h:outputText value="#{sale.total}">
+                            <f:convertNumber type="currency" currencySymbol="Q " />
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:rowExpansion>
+                        <p:dataTable var="detail" value="#{sale.details}">
+                            <p:column headerText="Producto">
+                                <h:outputText value="#{detail.product.name}" />
+                            </p:column>
+                            <p:column headerText="Cantidad" style="text-align: center;">
+                                <h:outputText value="#{detail.quantity}" />
+                            </p:column>
+                            <p:column headerText="Precio Unit." style="text-align: right;">
+                                <h:outputText value="#{detail.unitPrice}">
+                                    <f:convertNumber type="currency" currencySymbol="Q " />
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Subtotal" style="text-align: right;">
+                                <h:outputText value="#{detail.subtotal}">
+                                    <f:convertNumber type="currency" currencySymbol="Q " />
+                                </h:outputText>
+                            </p:column>
+                        </p:dataTable>
+                    </p:rowExpansion>
+
+                </p:dataTable>
+            </h:form>
+        </div>
+    </div>
+</h:body>
+</html>
