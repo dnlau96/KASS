@@ -6,6 +6,7 @@
 
 <h:head>
     <title>KASS - Product Management</title>
+    <h:outputStylesheet name="css/style.css" />
     </h:head>
 
 <h:body>
@@ -89,7 +90,7 @@
                     <p:panelGrid columns="2" rendered="#{not empty productBean.selectedProduct}">
                         
                         <p:outputLabel for="barcode" value="Barcode" />
-                        <p:inputText id="barcode" value="#{productBean.selectedProduct.barcode}" required="true" />
+                        <p:inputText id="barcode" value="#{productBean.selectedProduct.barcode}" required="true" maxlength="13"  />
                         
                         <p:outputLabel for="name" value="Name" />
                         <p:inputText id="name" value="#{productBean.selectedProduct.name}" required="true" />
