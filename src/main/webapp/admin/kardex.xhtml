@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
@@ -6,209 +7,207 @@
 
 <h:head>
     <title>KASS - Kardex &amp; Inventory</title>
-    </h:head>
+    <h:outputStylesheet name="css/style.css" />
+</h:head>
 
 <h:body>
-    <div class="page-container">
-
-        <div class="page-header">
-            <h2>Kardex y Movimientos</h2>
-            <div class="nav-buttons">
-                <h:form style="display: inline;">
-                    <p:commandButton value="Back to Dashboard" 
-                                     action="dashboard?faces-redirect=true" 
-                                     icon="pi pi-arrow-left"/>
-                </h:form>
-                <h:form style="display: inline;">
-                     <p:commandButton value="Logout" 
-                                      action="#{loginBean.logout}"  
-                                      icon="pi pi-sign-out" 
-                                      styleClass="ui-button-warning"/>
-                </h:form>
+    <div class="app-header">
+        <div class="header-left">
+            <div class="logo-container" ondblclick="PF('adminLoginDialogWidget').show()">
+                <h:graphicImage library="img" name="KASS_icone.png" alt="KASS Logo"/>
             </div>
+            <h:outputText value="Kardex y Movimientos" style="font-size: 1.5em; font-weight: bold; color: var(--text-color);" />
         </div>
         
-        <h:form id="form-entry">
-            <p:panel header="Registrar Ingreso de Producto (Por Factura)">
-                <p:messages id="messages" showDetail="true" closable="true"/>
-                <p:panelGrid columns="3" styleClass="ui-noborder">
-                    
-                    <p:outputLabel for="product" value="Producto:" />
-                    <p:selectOneMenu id="product" 
-                                    value="#{kardexBean.selectedProductId}" 
-                                    required="true" 
-                                    filter="true" filterMatchMode="contains">
+        <div class="header-right">
+            <h:form style="display: inline;">
+                <p:commandButton value="Back to Dashboard"
+                                 action="dashboard?faces-redirect=true"
+                                 icon="pi pi-arrow-left"
+                                 styleClass="header-button"/> </h:form>
+            <h:form style="display: inline;">
+                <p:commandButton value="Logout"
+                                 action="#{loginBean.logout}"
+                                 icon="pi pi-sign-out"
+                                 styleClass="ui-button-danger"/> </h:form>
+        </div>
+    </div>
 
-                       <f:converter converterId="jakarta.faces.Long" />
-
-                       <f:selectItem itemLabel="Seleccione un producto" itemValue="#{null}" />
-                       <f:selectItems value="#{kardexBean.allProducts}" 
-                                      var="p" 
-                                      itemLabel="#{p.name} (#{p.barcode})" 
-                                      itemValue="#{p.id}" />
-                   </p:selectOneMenu>
-                    <p:message for="product" />
-                    
-                    <p:outputLabel for="quantity" value="Cantidad (Unidades):" />
-                    <p:inputNumber id="quantity" 
-                                   value="#{kardexBean.quantity}" 
-                                   decimalPlaces="0" 
-                                   required="true" />
-                    <p:message for="quantity" />
-                    
-                    <p:outputLabel for="reference" value="Referencia (Ej: Factura #):" />
-                    <p:inputText id="reference" 
-                                 value="#{kardexBean.reference}" 
-                                 required="true" />
-                    <p:message for="reference" />
-
-                </p:panelGrid>
-                
-                <p:commandButton value="Guardar Ingreso" 
-                    icon="pi pi-save"
-                    action="#{kardexBean.saveStockEntry}"
-                    update=":form-entry:messages :form-entry:entryGrid :form-movements:dt-movements" 
-                    process="@form"/>
-            </p:panel>
-        </h:form>
+    <div class="main-content">
         
-        <br/>
+        <p:tabView id="kardexTabView">
 
-        
+            <p:tab title="Historial y Consultas">
+                <div class="content-card"> <h:form id="form-movements">
+                        <p:panel header="Últimos Movimientos Registrados">
 
-                <h:form id="form-adjustment">
-                    <p:panel header="Registrar Ajuste de Inventario (Correcciones, Conteos, Bajas)">
-                        <p:messages id="adj-messages" showDetail="true" closable="true"/>
-                        <p:panelGrid id="adj-grid" columns="3" styleClass="ui-noborder">
-
-                            <p:outputLabel for="adj-product" value="Producto:" />
-                            <p:selectOneMenu id="adj-product" 
-                                             value="#{kardexBean.adjSelectedProductId}" 
-                                             required="true" 
-                                             filter="true" filterMatchMode="contains">
-                                <f:converter converterId="jakarta.faces.Long" />
-                                <f:selectItem itemLabel="Seleccione un producto" itemValue="#{null}" />
-                                <f:selectItems value="#{kardexBean.allProducts}" 
-                                               var="p" 
-                                               itemLabel="#{p.name} (#{p.barcode})" 
-                                               itemValue="#{p.id}" />
-                            </p:selectOneMenu>
-                            <p:message for="adj-product" />
-
-                            <p:outputLabel for="adj-quantity" value="Cantidad (Ej: -100 ó +5):" />
-                            <p:inputNumber id="adj-quantity" 
-                                           value="#{kardexBean.adjQuantity}" 
-                                           decimalPlaces="0" 
-                                           required="true" />
-                            <p:message for="adj-quantity" />
-
-                            <p:outputLabel for="adj-type" value="Tipo de Ajuste:" />
-                            <p:selectOneMenu id="adj-type" 
-                                             value="#{kardexBean.adjMovementType}" 
-                                             required="true">
-                                <f:selectItem itemLabel="Seleccione un tipo" itemValue="#{null}" />
-                                <f:selectItems value="#{kardexBean.adjustmentTypes}" />
-                            </p:selectOneMenu>
-                            <p:message for="adj-type" />
-
-                            <p:outputLabel for="adj-reference" value="Razón / Referencia:" />
-                            <p:inputText id="adj-reference" 
-                                         value="#{kardexBean.adjReference}" 
-                                         required="true"
-                                         placeholder="Ej: Reversión Factura #123 por error"/>
-                            <p:message for="adj-reference" />
-
-                        </p:panelGrid>
-
-                        <p:commandButton value="Guardar Ajuste" 
-                                         icon="pi pi-pencil"
-                                         action="#{kardexBean.saveAdjustment}"
-                                         styleClass="ui-button-warning"
-                                         update=":form-adjustment:adj-messages :form-adjustment:adj-grid :form-movements:dt-movements"
-                                         process="@form"/>
-                    </p:panel>
-                </h:form>
-                <br/>
-
-            <h:form id="form-movements">
-                <p:panel header="Últimos Movimientos Registrados">
-
-                    <p:panelGrid columns="4" styleClass="ui-noborder" style="margin-bottom: 10px;">
-                        <p:outputLabel for="search-product" value="Buscar por Producto:" />
-
-                        <p:selectOneMenu id="search-product" 
-                                         value="#{kardexBean.searchProductId}" 
-                                         filter="true" filterMatchMode="contains" 
-                                         style="min-width: 250px;">
-                            <f:converter converterId="jakarta.faces.Long" />
-                            <f:selectItem itemLabel="Todos los productos" itemValue="#{null}" />
-                            <f:selectItems value="#{kardexBean.allProducts}" 
-                                           var="p" 
-                                           itemLabel="#{p.name} (#{p.barcode})" 
-                                           itemValue="#{p.id}" />
-                        </p:selectOneMenu>
-
-                        <p:commandButton value="Buscar" 
-                                         icon="pi pi-search"
-                                         action="#{kardexBean.searchMovements}"
-                                         update="dt-movements" />
-
-                        <p:commandButton value="Mostrar Todos" 
-                                         icon="pi pi-refresh"
-                                         action="#{kardexBean.clearSearch}"
-                                         update="dt-movements @form:search-product" 
-                                         process="@this"
-                                         styleClass="ui-button-secondary"/>
-                    </p:panelGrid>
-
-
-                    <p:dataTable id="dt-movements" var="mov" value="#{kardexBean.movements}"
-                                 widgetVar="dt-movements" paginator="true" rows="20" 
-                                 emptyMessage="No se han registrado movimientos.">
-
-                        <p:column headerText="Fecha" sortBy="#{mov.movementDateAsDate}" style="width: 10rem">
-                            <h:outputText value="#{mov.movementDateAsDate}">
-                               <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
-                            </h:outputText>
-                        </p:column>
-
-                        <p:column headerText="Producto" filterBy="#{mov.product.name}" filterMatchMode="contains">
-                            <h:outputText value="#{mov.product.name}" />
-                        </p:column>
-
-                        <p:column headerText="Cantidad" sortBy="#{mov.quantity}" style="width: 6rem; text-align: center;">
-                            <h:outputText value="#{mov.quantity}" 
-                                          style="color: #{mov.quantity > 0 ? 'green' : 'red'}; font-weight: bold;" />
-                        </p:column>
-
-                        <p:column headerText="Tipo" filterBy="#{mov.movementType}" filterMatchMode="exact" style="width: 12rem">
-                            <f:facet name="filter">
-                                <p:selectOneMenu onchange="PF('dt-movements').filter()" styleClass="custom-filter">
-                                    <f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true" />
-
-                                    <f:selectItem itemLabel="Salida por Venta" itemValue="SALIDA_VENTA" />
-
-                                    <f:selectItem itemLabel="Ingreso Factura" itemValue="INGRESO_FACTURA" />
-                                    <f:selectItem itemLabel="Error Ingreso" itemValue="AJUSTE_ERROR_INGRESO" />
-                                    <f:selectItem itemLabel="Faltante" itemValue="AJUSTE_FALTANTE" />
-                                    <f:selectItem itemLabel="Sobrante" itemValue="AJUSTE_SOBRANTE" />
-                                    <f:selectItem itemLabel="Dañado" itemValue="AJUSTE_DAÑADO" />
+                            <p:panelGrid columns="4" styleClass="ui-noborder" style="margin-bottom: 10px;">
+                                <p:outputLabel for="search-product" value="Buscar por Producto:" />
+                                <p:selectOneMenu id="search-product"
+                                                 value="#{kardexBean.searchProductId}"
+                                                 filter="true" filterMatchMode="contains"
+                                                 style="min-width: 250px;">
+                                    <f:converter converterId="jakarta.faces.Long" />
+                                    <f:selectItem itemLabel="Todos los productos" itemValue="#{null}" />
+                                    <f:selectItems value="#{kardexBean.allProducts}"
+                                                   var="p"
+                                                   itemLabel="#{p.name} (#{p.barcode})"
+                                                   itemValue="#{p.id}" />
                                 </p:selectOneMenu>
-                            </f:facet>
-                            <h:outputText value="#{mov.movementType}" />
-                        </p:column>
 
-                        <p:column headerText="Referencia">
-                            <h:outputText value="#{mov.reference}" />
-                        </p:column>
+                                <p:commandButton value="Buscar"
+                                                 icon="pi pi-search"
+                                                 action="#{kardexBean.searchMovements}"
+                                                 update="dt-movements" />
 
-                        <p:column headerText="Usuario" filterBy="#{mov.user.username}" filterMatchMode="contains" style="width: 8rem">
-                            <h:outputText value="#{mov.user.username}" />
-                        </p:column>
+                                <p:commandButton value="Mostrar Todos"
+                                                 icon="pi pi-refresh"
+                                                 action="#{kardexBean.clearSearch}"
+                                                 update="dt-movements @form:search-product"
+                                                 process="@this"/>
+                            </p:panelGrid>
 
-                    </p:dataTable>
-                </p:panel>
-        </h:form>
-        
-    </div> </h:body>
+                            <p:dataTable id="dt-movements" var="mov" value="#{kardexBean.movements}"
+                                         widgetVar="dt-movements" paginator="true" rows="20"
+                                         emptyMessage="No se han registrado movimientos.">
+                                
+                                <p:column headerText="Fecha" sortBy="#{mov.movementDateAsDate}" style="width: 10rem">
+                                    <h:outputText value="#{mov.movementDateAsDate}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="Producto" filterBy="#{mov.product.name}" filterMatchMode="contains">
+                                    <h:outputText value="#{mov.product.name}" />
+                                </p:column>
+                                <p:column headerText="Cantidad" sortBy="#{mov.quantity}" style="width: 6rem; text-align: center;">
+                                    <h:outputText value="#{mov.quantity}"
+                                                  style="color: #{mov.quantity > 0 ? 'green' : 'red'}; font-weight: bold;" />
+                                </p:column>
+                                <p:column headerText="Tipo" filterBy="#{mov.movementType}" filterMatchMode="exact" style="width: 12rem">
+                                    <f:facet name="filter">
+                                        <p:selectOneMenu onchange="PF('dt-movements').filter()" styleClass="custom-filter">
+                                            <f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true" />
+                                            <f:selectItem itemLabel="Salida por Venta" itemValue="SALIDA_VENTA" />
+                                            <f:selectItem itemLabel="Ingreso Factura" itemValue="INGRESO_FACTURA" />
+                                            <f:selectItem itemLabel="Error Ingreso" itemValue="AJUSTE_ERROR_INGRESO" />
+                                            <f:selectItem itemLabel="Faltante" itemValue="AJUSTE_FALTANTE" />
+                                            <f:selectItem itemLabel="Sobrante" itemValue="AJUSTE_SOBRANTE" />
+                                            <f:selectItem itemLabel="Dañado" itemValue="AJUSTE_DAÑADO" />
+                                        </p:selectOneMenu>
+                                    </f:facet>
+                                    <h:outputText value="#{mov.movementType}" />
+                                </p:column>
+                                <p:column headerText="Referencia">
+                                    <h:outputText value="#{mov.reference}" />
+                                </p:column>
+                                <p:column headerText="Usuario" filterBy="#{mov.user.username}" filterMatchMode="contains" style="width: 8rem">
+                                    <h:outputText value="#{mov.user.username}" />
+                                </p:column>
+                            </p:dataTable>
+                        </p:panel>
+                    </h:form>
+                </div>
+            </p:tab>
+
+            <p:tab title="Registrar Ingreso (Factura)">
+                <div class="content-card"> <h:form id="form-entry">
+                        <p:panel header="Registrar Ingreso de Producto (Por Factura)">
+                            <p:messages id="messages" showDetail="true" closable="true"/>
+                            <p:panelGrid id="entryGrid" columns="3" styleClass="ui-noborder">
+
+                                <p:outputLabel for="product" value="Producto:" />
+                                <p:selectOneMenu id="product"
+                                                 value="#{kardexBean.selectedProductId}"
+                                                 required="true"
+                                                 filter="true" filterMatchMode="contains">
+                                    <f:converter converterId="jakarta.faces.Long" />
+                                    <f:selectItem itemLabel="Seleccione un producto" itemValue="#{null}" />
+                                    <f:selectItems value="#{kardexBean.allProducts}"
+                                                   var="p"
+                                                   itemLabel="#{p.name} (#{p.barcode})"
+                                                   itemValue="#{p.id}" />
+                                </p:selectOneMenu>
+                                <p:message for="product" />
+
+                                <p:outputLabel for="quantity" value="Cantidad (Unidades):" />
+                                <p:inputNumber id="quantity"
+                                               value="#{kardexBean.quantity}"
+                                               decimalPlaces="0"
+                                               required="true" />
+                                <p:message for="quantity" />
+
+                                <p:outputLabel for="reference" value="Referencia (Ej: Factura #):" />
+                                <p:inputText id="reference"
+                                             value="#{kardexBean.reference}"
+                                             required="true" />
+                                <p:message for="reference" />
+
+                            </p:panelGrid>
+
+                            <p:commandButton value="Guardar Ingreso"
+                                             icon="pi pi-save"
+                                             action="#{kardexBean.saveStockEntry}"
+                                             process="@form"
+                                             update="@form :kardexTabView:form-movements:dt-movements" />
+                                             </p:panel>
+                    </h:form>
+                </div>
+            </p:tab>
+            
+            <p:tab title="Registrar Ajuste (Baja/Conteo)">
+                <div class="content-card"> <h:form id="form-adjustment">
+                        <p:panel header="Registrar Ajuste de Inventario (Correcciones, Conteos, Bajas)">
+                            <p:messages id="adj-messages" showDetail="true" closable="true"/>
+                            <p:panelGrid id="adj-grid" columns="3" styleClass="ui-noborder">
+
+                                <p:outputLabel for="adj-product" value="Producto:" />
+                                <p:selectOneMenu id="adj-product"
+                                                 value="#{kardexBean.adjSelectedProductId}"
+                                                 required="true"
+                                                 filter="true" filterMatchMode="contains">
+                                    <f:converter converterId="jakarta.faces.Long" />
+                                    <f:selectItem itemLabel="Seleccione un producto" itemValue="#{null}" />
+                                    <f:selectItems value="#{kardexBean.allProducts}"
+                                                   var="p"
+                                                   itemLabel="#{p.name} (#{p.barcode})"
+                                                   itemValue="#{p.id}" />
+                                </p:selectOneMenu>
+                                <p:message for="adj-product" />
+
+                                <p:outputLabel for="adj-quantity" value="Cantidad (Ej: -100 ó +5):" />
+                                <p:inputNumber id="adj-quantity"
+                                               value="#{kardexBean.adjQuantity}"
+                                               decimalPlaces="0"
+                                               required="true" />
+                                <p:message for="adj-quantity" />
+
+                                <p:outputLabel for="adj-type" value="Tipo de Ajuste:" />
+                                <p:selectOneMenu id="adj-type"
+                                                 value="#{kardexBean.adjMovementType}"
+                                                 required="true">
+                                    <f:selectItem itemLabel="Seleccione un tipo" itemValue="#{null}" />
+                                    <f:selectItems value="#{kardexBean.adjustmentTypes}" />
+                                </p:selectOneMenu>
+                                <p:message for="adj-type" />
+
+                                <p:outputLabel for="adj-reference" value="Razón / Referencia:" />
+                                <p:inputText id="adj-reference"
+                                             value="#{kardexBean.adjReference}"
+                                             required="true"
+                                             placeholder="Ej: Reversión Factura #123 por error"/>
+                                <p:message for="adj-reference" />
+
+                            </p:panelGrid>
+
+                            <p:commandButton value="Guardar Ajuste"
+                                             icon="pi pi-pencil"
+                                             action="#{kardexBean.saveAdjustment}"
+                                             process="@form"
+                                             update="@form :kardexTabView:form-movements:dt-movements" />
+                                             </p:panel>
+                    </h:form>
+                </div>
+            </p:tab>
+
+        </p:tabView> </div> </h:body>
 </html>
