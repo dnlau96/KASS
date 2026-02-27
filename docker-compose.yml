@@ -1,0 +1,19 @@
+services:
+  database:
+    image: postgres:15
+    container_name: postgres-kass
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: kass2_db
+    ports:
+      - "5432:5432"
+
+  payara:
+    build: .
+    container_name: payara-kass
+    ports:
+      - "8080:8080"
+      - "4848:4848"
+    depends_on:
+      - database

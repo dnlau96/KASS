@@ -7,7 +7,7 @@
     region: us-east-1           # Cambia a tu región
     instance_type: t2.micro     # Tipo de instancia
     ami_id: ami-0c7217cdde317cfec # Ubuntu 22.04 LTS (Verifica el ID en tu región)
-    key_name: mi-llave-aws      # El nombre de tu par de llaves en AWS (.pem)
+    key_name: KASS      # El nombre de tu par de llaves en AWS (.pem)
 
   tasks:
     - name: Crear Grupo de Seguridad para la App

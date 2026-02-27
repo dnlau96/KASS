@@ -1,0 +1,47 @@
+---
+- name: Provisionar y Desplegar en AWS
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    region: us-east-1
+    instance_type: t2.micro
+    ami_id: ami-0c7217cdde317cfec # Ubuntu 22.04 LTS
+    key_name: KASS # El nombre de tu llave en AWS
+
+  tasks:
+    - name: Crear Grupo de Seguridad
+      amazon.aws.ec2_security_group:
+        name: "sg_jakarta_examen"
+        description: "Permitir SSH, Payara y Consola"
+        region: "{{ region }}"
+        rules:
+          - { proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0 }
+          - { proto: tcp, from_port: 8080, to_port: 8080, cidr_ip: 0.0.0.0/0 }
+          - { proto: tcp, from_port: 4848, to_port: 4848, cidr_ip: 0.0.0.0/0 }
+      register: sg_info
+
+    - name: Lanzar Instancia EC2 con Docker Autoinstalado
+      amazon.aws.ec2_instance:
+        name: "Servidor-App-KASS"
+        key_name: "{{ key_name }}"
+        region: "{{ region }}"
+        instance_type: "{{ instance_type }}"
+        image_id: "{{ ami_id }}"
+        security_group: "{{ sg_info.group_id }}"
+        wait: yes
+        user_data: |
+          #!/bin/bash
+          apt-get update
+          apt-get install -y docker.io docker-compose git
+          systemctl start docker
+          systemctl enable docker
+          # Aquí es donde le decimos a la nueva máquina que baje tu código
+          git clone https://github.com/TU_USUARIO/TU_REPO.git /home/ubuntu/app
+          cd /home/ubuntu/app
+          docker-compose up -d --build
+      register: ec2
+
+    - name: Resultado Final
+      debug:
+        msg: "Espera 2 minutos y entra a: http://{{ ec2.instances[0].public_ip_address }}:8080/KASS2/"
