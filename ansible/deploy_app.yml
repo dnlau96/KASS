@@ -1,0 +1,30 @@
+---
+- name: Configurar Instancia y Desplegar App Jakarta
+  hosts: newly_created  # La IP de AWS
+  become: yes
+  tasks:
+    - name: Instalar Docker y Docker Compose
+      apt:
+        name: 
+          - docker.io
+          - docker-compose
+        state: present
+        update_cache: yes
+
+    - name: Crear directorio de la aplicación
+      file:
+        path: /opt/mi-negocio
+        state: directory
+
+    - name: Copiar archivos de despliegue
+      copy:
+        src: "../{{ item }}" 
+        dest: /opt/mi-negocio/
+      loop:
+        - docker-compose.yml
+        - target/KASS2.war
+
+    - name: Levantar la infraestructura (App + Postgres)
+      community.docker.docker_compose:
+        project_src: /opt/mi-negocio
+        state: present

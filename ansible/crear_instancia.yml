@@ -1,0 +1,42 @@
+---
+- name: Provisionar Instancia EC2
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    region: us-east-1           # Cambia a tu región
+    instance_type: t2.micro     # Tipo de instancia
+    ami_id: ami-0c7217cdde317cfec # Ubuntu 22.04 LTS (Verifica el ID en tu región)
+    key_name: mi-llave-aws      # El nombre de tu par de llaves en AWS (.pem)
+
+  tasks:
+    - name: Crear Grupo de Seguridad para la App
+      amazon.aws.ec2_security_group:
+        name: app-sg
+        description: "Permitir SSH (22), HTTP (8080) y DB (5432)"
+        region: "{{ region }}"
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 8080
+            to_port: 8080
+            cidr_ip: 0.0.0.0/0
+      register: sg_info
+
+    - name: Lanzar instancia EC2
+      amazon.aws.ec2_instance:
+        name: "Servidor-App-Jakarta"
+        key_name: "{{ key_name }}"
+        region: "{{ region }}"
+        instance_type: "{{ instance_type }}"
+        image_id: "{{ ami_id }}"
+        security_group: "{{ sg_info.group_id }}"
+        wait: yes
+      register: ec2
+
+    - name: Mostrar la IP pública de la nueva instancia
+      debug:
+        msg: "La IP es: {{ ec2.instances[0].public_ip_address }}"
