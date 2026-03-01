@@ -37,7 +37,7 @@
           systemctl start docker
           systemctl enable docker
           # Aquí es donde le decimos a la nueva máquina que baje tu código
-          git clone https://github.com/TU_USUARIO/TU_REPO.git /home/ubuntu/app
+          git clone https://github.com/dnlau96/KASS.git /home/ubuntu/app
           cd /home/ubuntu/app
           docker-compose up -d --build
       register: ec2
