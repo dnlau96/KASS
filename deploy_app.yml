@@ -25,7 +25,13 @@
         src: target/KASS2.war
         dest: /home/ubuntu/kass_app/KASS2.war
 
-    - name: Levantar la infraestructura (Limpiando conflictos)
+    - name: Limpiar contenedores antiguos (Para evitar error de metadatos)
+      shell: docker-compose down
+      args:
+        chdir: /home/ubuntu/kass_app/
+      ignore_errors: yes # Por si es la primera vez y no hay nada que bajar
+
+    - name: Levantar la infraestructura limpia
       shell: docker-compose up --build -d
       args:
         chdir: /home/ubuntu/kass_app/
