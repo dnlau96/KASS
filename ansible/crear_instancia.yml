@@ -1,42 +1,52 @@
 ---
-- name: Provisionar Instancia EC2
+- name: Provisionar Nueva Instancia para Cliente
   hosts: localhost
   connection: local
   gather_facts: false
   vars:
-    region: us-east-1           # Cambia a tu región
-    instance_type: t2.micro     # Tipo de instancia
-    ami_id: ami-0c7217cdde317cfec # Ubuntu 22.04 LTS (Verifica el ID en tu región)
-    key_name: KASS      # El nombre de tu par de llaves en AWS (.pem)
+    region: us-east-1
+    instance_type: t2.micro
+    ami_id: ami-0c7217cdde317cfec 
+    key_name: KASS 
+    # El nombre del cliente vendrá desde afuera, si no se da, falla por seguridad.
+    cliente_nombre: "{{ cliente | default(omit) }}"
 
   tasks:
-    - name: Crear Grupo de Seguridad para la App
+    - name: Validar que se proporcionó un nombre de cliente
+      fail:
+        msg: "ERROR: Debes indicar el nombre del cliente. Ejemplo: ansible-playbook crear_instancia.yml -e 'cliente=JuanPerez'"
+      when: cliente is not defined
+
+    - name: Crear Grupo de Seguridad específico para el cliente
       amazon.aws.ec2_security_group:
-        name: app-sg
-        description: "Permitir SSH (22), HTTP (8080) y DB (5432)"
+        name: "sg-{{ cliente }}"
+        description: "Reglas para el cliente {{ cliente }}"
         region: "{{ region }}"
         rules:
-          - proto: tcp
-            from_port: 22
-            to_port: 22
-            cidr_ip: 0.0.0.0/0
-          - proto: tcp
-            from_port: 8080
-            to_port: 8080
-            cidr_ip: 0.0.0.0/0
+          - { proto: tcp, from_port: 22, to_port: 22, cidr_ip: 0.0.0.0/0 }
+          - { proto: tcp, from_port: 8080, to_port: 8080, cidr_ip: 0.0.0.0/0 }
       register: sg_info
 
-    - name: Lanzar instancia EC2
+    - name: Lanzar instancia EC2 personalizada
       amazon.aws.ec2_instance:
-        name: "Servidor-App-Jakarta"
+        # Aquí el nombre en AWS será único para cada cliente
+        name: "App-KASS2-{{ cliente }}"
         key_name: "{{ key_name }}"
         region: "{{ region }}"
         instance_type: "{{ instance_type }}"
         image_id: "{{ ami_id }}"
         security_group: "{{ sg_info.group_id }}"
         wait: yes
+        tags:
+          Cliente: "{{ cliente }}"
+          Producto: "KASS2"
       register: ec2
 
-    - name: Mostrar la IP pública de la nueva instancia
+    - name: Generar Inventario específico para este cliente
+      shell: |
+        echo "[{{ cliente }}]" > hosts_{{ cliente }}.ini
+        echo "{{ ec2.instances[0].public_ip_address }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/KASS.pem" >> hosts_{{ cliente }}.ini
+
+    - name: Resumen de Venta
       debug:
-        msg: "La IP es: {{ ec2.instances[0].public_ip_address }}"
+        msg: "Instancia creada para {{ cliente }}. IP: {{ ec2.instances[0].public_ip_address }}. Inventario generado: hosts_{{ cliente }}.ini"

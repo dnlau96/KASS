@@ -1,0 +1,33 @@
+---
+- name: Configurar Instancia y Desplegar KASS2
+  hosts: kass_server  
+  become: yes
+  tasks:
+    - name: Crear directorio de la aplicación
+      file:
+        path: /home/ubuntu/kass_app
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Copiar archivos necesarios para el despliegue
+      copy:
+        src: "{{ item }}" 
+        dest: /home/ubuntu/kass_app/
+      loop:
+        - docker-compose.yml
+        - Dockerfile
+        - entrypoint.sh
+        - setup.asadmin
+        - pom.xml
+
+    - name: Copiar la carpeta de código fuente (src)
+      copy:
+        src: src/
+        dest: /home/ubuntu/kass_app/src/
+
+    - name: Levantar la infraestructura (Build y Up)
+      
+      shell: docker-compose up --build -d
+      args:
+        chdir: /home/ubuntu/kass_app/

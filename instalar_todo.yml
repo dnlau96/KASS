@@ -1,0 +1,37 @@
+---
+- name: Configurar Servidor KASS en AWS
+  hosts: kass_server
+  become: yes  # Esto es para ejecutar como sudo
+  tasks:
+    - name: Crear archivo Swap de 2GB (Evita que el servidor se cuelgue)
+      shell: |
+        if [ ! -f /swapfile ]; then
+          fallocate -l 2G /swapfile
+          chmod 600 /swapfile
+          mkswap /swapfile
+          swapon /swapfile
+          echo '/swapfile none swap sw 0 0' >> /etc/fstab
+        fi
+      register: swap_res
+      changed_when: "'swapon' in swap_res.stdout"
+
+    - name: Instalar Docker y dependencias
+      apt:
+        name: 
+          - docker.io
+          - docker-compose
+        state: present
+        update_cache: yes
+
+    - name: Asegurar que el servicio Docker esté activo
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Agregar usuario ubuntu al grupo docker
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
