@@ -9,9 +9,10 @@ pipeline {
         }
         stage('Desplegar a AWS con Ansible') {
             steps {
-                // Usamos las credenciales de la llave que guardaste en Jenkins
                 withCredentials([sshUserPrivateKey(credentialsId: 'aws-kass-key', keyFileVariable: 'KEY')]) {
-                    sh "ansible-playbook -i hosts.ini deploy_app.yml --private-key=${KEY}"
+                    // Eliminamos la referencia manual a /var/jenkins_home/.ssh/KASS.pem
+                    // y usamos ${KEY} que es donde Jenkins pone la llave temporalmente
+                    sh "ansible-playbook -i hosts.ini deploy_app.yml --private-key=${KEY} -u ubuntu"
                 }
             }
         }

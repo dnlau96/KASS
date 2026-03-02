@@ -10,7 +10,7 @@
         owner: ubuntu
         group: ubuntu
 
-    - name: Copiar archivos necesarios para el despliegue
+    - name: Copiar archivos de configuración (Sin SRC ni POM)
       copy:
         src: "{{ item }}" 
         dest: /home/ubuntu/kass_app/
@@ -19,15 +19,13 @@
         - Dockerfile
         - entrypoint.sh
         - setup.asadmin
-        - pom.xml
 
-    - name: Copiar la carpeta de código fuente (src)
+    - name: Enviar el WAR ya compilado
       copy:
-        src: src/
-        dest: /home/ubuntu/kass_app/src/
+        src: target/KASS2.war
+        dest: /home/ubuntu/kass_app/KASS2.war
 
-    - name: Levantar la infraestructura (Build y Up)
-      
-      shell: docker-compose up --build -d
+    - name: Levantar la infraestructura (Sin reconstruir dependencias)
+      shell: docker-compose up -d
       args:
         chdir: /home/ubuntu/kass_app/
