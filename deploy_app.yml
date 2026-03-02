@@ -25,7 +25,7 @@
         src: target/KASS2.war
         dest: /home/ubuntu/kass_app/KASS2.war
 
-    - name: Levantar la infraestructura (Sin reconstruir dependencias)
-      shell: docker-compose up -d
+    - name: Levantar la infraestructura (Limpiando conflictos)
+      shell: docker-compose up --build -d
       args:
         chdir: /home/ubuntu/kass_app/
